@@ -9,9 +9,9 @@ const dataFile = "data/data.json"
 
 // Feed contains information we need to process a feed.
 type Feed struct {
-	Name 	string `json:"site"`
-	URI		string `json:"link"`
-	Type 	string `json:"type"`
+	Name string `json:"site"`
+	URI  string `json:"link"`
+	Type string `json:"type"`
 }
 
 // RetrieveFeeds reads and unmarshals the feed data file.
@@ -31,5 +31,6 @@ func RetrieveFeeds() ([]*Feed, error) {
 	var feeds []*Feed
 	err = json.NewDecoder(file).Decode(&feeds)
 
+	// We don't need to check for errors, the caller can do this.
 	return feeds, err
 }

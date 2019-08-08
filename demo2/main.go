@@ -14,5 +14,5 @@ func init() { //在main前先执行
 }
 
 func main() {
-	search.Run("das")
+	search.Run("president")
 }

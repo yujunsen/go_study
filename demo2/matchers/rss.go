@@ -2,9 +2,11 @@ package matchers
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/goinaction/mycode/demo2/search"
 )
@@ -61,27 +63,57 @@ type rssMatcher struct{}
 // init registers the matcher with the program.
 func init() {
 	var matcher rssMatcher
-	search.Registers("rss", matcher)
+	search.Register("rss", matcher)
 }
 
 // Search looks at the document for the specified search term.
-func (m rssMatcher) Search(feed *search.Feed, searchTerm string) ([]*search.Result, err) {
+func (m rssMatcher) Search(feed *search.Feed, searchTerm string) ([]*search.Result, error) {
 	var results []*search.Result
 
 	log.Printf("Search Feed Type[%s] Site[%s] For URI[%s]\n", feed.Type, feed.Name, feed.URI)
 
 	// Retrieve the data to search.
 	document, err := m.retrieve(feed)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
+	for _, channelItem := range document.Channel.Item {
+		// Check the title for the search term.
+		matched, err := regexp.MatchString(searchTerm, channelItem.Title)
+		if err != nil {
+			return nil, err
+		}
+		// If we found a match save the result.
+		if matched {
+			results = append(results, &search.Result{
+				Field:   "Title",
+				Content: channelItem.Title,
+			})
+		}
+
+		// Check the description for the search term.
+		matched, err = regexp.MatchString(searchTerm, channelItem.Description)
+		if err != nil {
+			return nil, err
+		}
+		// If we found a match save the result.
+		if matched {
+			results = append(results, &search.Result{
+				Field:   "Description",
+				Content: channelItem.Description,
+			})
+		}
+
+	}
+
+	return results, err
 }
 
 // retrieve performs a HTTP Get request for the rss feed and decodes the results.
 func (m rssMatcher) retrieve(feed *search.Feed) (*rssDocument, error) {
 	if feed.URI == "" {
-		return nil, error.New("No rss feed uri provided")
+		return nil, errors.New("No rss feed uri provided")
 	}
 
 	// Retrieve the rss feed document from the web.
