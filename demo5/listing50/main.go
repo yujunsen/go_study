@@ -37,3 +37,8 @@ func main() {
 	//内部方法可以提升到外部
 	ad.notify()
 }
+
+/*
+Sending user email to john smith<john@yahoo.com>
+Sending user email to john smith<john@yahoo.com>
+*/
